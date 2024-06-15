@@ -9,7 +9,31 @@ aberthMethod(a)
 
 colors = ['r', 'g', 'b']
 
-def plot_pol_and_roots(func, title):
+def sort_with_noise(reference_list, noisy_list):
+    sorted_noisy_list = []
+    used_indices = set()
+
+    for ref in reference_list:
+        # Find the closest element in the noisy list that hasn't been used yet
+        closest_index = None
+        closest_distance = float('inf')
+        
+        for i, noisy in enumerate(noisy_list):
+            if i in used_indices:
+                continue
+
+            distance = abs(ref - noisy)
+            if distance < closest_distance:
+                closest_distance = distance
+                closest_index = i
+
+        if closest_index is not None:
+            sorted_noisy_list.append(noisy_list[closest_index])
+            used_indices.add(closest_index)
+
+    return sorted_noisy_list
+
+def plot_pol_and_roots(func, title, prev_sol):
     plt.subplot(121)
 
     for coef, color in zip(func.coef[:-1], colors):  # ignore last coefficient, it's 1, we ignore constant scaling
@@ -17,8 +41,12 @@ def plot_pol_and_roots(func, title):
     plt.xlim(-5, 5)
     plt.ylim(-5, 5)
 
+    constant_sign = "+" if func.coef[-2].real >= 0 else "-"
+    plt.annotate(r"$x^2 + ({:.1f})x {} {:.1f}$".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', '\mathrm{i}'), (-5, -3))
+
     plt.subplot(122)
     _, sols = aberthMethod(func)
+    sols = sort_with_noise(prev_sol, sols)
 
     for s, color in zip(sols, colors):
         plt.plot(s.real, s.imag, c=color, marker='o')
@@ -84,8 +112,11 @@ points = [0 + 0j, 4 + 0j, 4 + 3j, 0 + 3j]
 n = 10
 triangle_points = polygon([0, -3+3j, +3j, 0], 60)
 
+_, sols = aberthMethod(Function({0: -1, 1: 1/2, 2:1}))
+sols = sorted(sols, key=lambda x: x.imag)
+
 for i in range(60):
-    plot_pol_and_roots(Function({0: -1, 1: 1/2 + triangle_points[i], 2:1}), title=i)
+    sols = plot_pol_and_roots(Function({0: -1, 1: 1/2 + triangle_points[i], 2:1}), title=i, prev_sol=sols)
 
 quit()
 for i in range(40):
