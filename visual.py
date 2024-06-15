@@ -3,6 +3,8 @@ from aberth_method.aberthMethod import aberthMethod
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.rcParams["font.family"] = "monospace"
+plt.rcParams["font.monospace"] = ["FreeMono"]
 
 a = Function({0: -1, 1: 1/2, 2:1})
 aberthMethod(a)
@@ -48,14 +50,22 @@ def plot_pol_and_roots(func, title, prev_sol):
     plt.gca().spines['top'].set_visible(False)
 
     constant_sign = "+" if func.coef[-2].real >= 0 else "-"
-    plt.title(r"$x^2 + ({:.1f})x {} {:.1f}$=0".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', '\mathrm{i}'), loc='left')
+    plt.title("x^2 + ({:.1f})x {} {:.1f}=0".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', 'i'))
 
     plt.subplot(122)
     _, sols = aberthMethod(func)
     sols = sort_with_noise(prev_sol, sols)
+    left_title = ""
 
     for s, color in zip(sols, colors):
         plt.plot(s.real, s.imag, c=color, marker='o')
+
+        constant_sign = "+" if s.real >= 0 else "-"
+        left_title += "(x {} {:.1f})".format(constant_sign, (abs(s.real) + s.imag * 1j))
+    left_title += "=0"
+
+    plt.title(left_title.replace('j', 'i'))
+        
     plt.xlim(-5, 5)
     plt.ylim(-5, 5)
 
