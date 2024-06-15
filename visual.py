@@ -34,6 +34,7 @@ def sort_with_noise(reference_list, noisy_list):
     return sorted_noisy_list
 
 def plot_pol_and_roots(func, title, prev_sol):
+    plt.figure(figsize=(12, 8))
     plt.subplot(121)
 
     for coef, color in zip(func.coef[:-1], colors):  # ignore last coefficient, it's 1, we ignore constant scaling
@@ -41,8 +42,13 @@ def plot_pol_and_roots(func, title, prev_sol):
     plt.xlim(-5, 5)
     plt.ylim(-5, 5)
 
+    plt.gca().spines['left'].set_position(('data', 0))
+    plt.gca().spines['bottom'].set_position(('data', 0))
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines['top'].set_visible(False)
+
     constant_sign = "+" if func.coef[-2].real >= 0 else "-"
-    plt.annotate(r"$x^2 + ({:.1f})x {} {:.1f}$".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', '\mathrm{i}'), (-5, -3))
+    plt.title(r"$x^2 + ({:.1f})x {} {:.1f}$=0".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', '\mathrm{i}'))
 
     plt.subplot(122)
     _, sols = aberthMethod(func)
@@ -52,6 +58,11 @@ def plot_pol_and_roots(func, title, prev_sol):
         plt.plot(s.real, s.imag, c=color, marker='o')
     plt.xlim(-5, 5)
     plt.ylim(-5, 5)
+
+    plt.gca().spines['left'].set_position(('data', 0))
+    plt.gca().spines['bottom'].set_position(('data', 0))
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines['top'].set_visible(False)
 
     plt.savefig(str(title))
     plt.close()
