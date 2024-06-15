@@ -35,16 +35,16 @@ def sort_with_noise(reference_list, noisy_list):
 
     return sorted_noisy_list
 
-def plot_pol_and_roots(func, title, prev_sol, traces=None):
+def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None):
     plt.figure(figsize=(12, 8))
     plt.subplot(121)
 
     for i, (coef, color) in enumerate(zip(func.coef[:-1], colors)):  # ignore last coefficient, it's 1, we ignore constant scaling
         plt.plot(coef.real, coef.imag, c=color, marker='o')
 
-        if traces:
-            plt.plot([t.real for t in traces[i]], [t.imag for t in traces[i]], c=color, alpha=0.2)
-            traces[i].append(coef)
+        if coef_traces:
+            plt.plot([t.real for t in coef_traces[i]], [t.imag for t in coef_traces[i]], c=color, alpha=0.2)
+            coef_traces[i].append(coef)
 
     plt.xlim(-5, 5)
     plt.ylim(-5, 5)
@@ -62,8 +62,12 @@ def plot_pol_and_roots(func, title, prev_sol, traces=None):
     sols = sort_with_noise(prev_sol, sols)
     left_title = ""
 
-    for s, color in zip(sols, colors):
+    for i, (s, color) in enumerate(zip(sols, colors)):
         plt.plot(s.real, s.imag, c=color, marker='o')
+
+        if sol_traces:
+            plt.plot([t.real for t in sol_traces[i]], [t.imag for t in sol_traces[i]], c=color, alpha=0.2)
+            sol_traces[i].append(s)
 
         constant_sign = "+" if s.real >= 0 else "-"
         left_title += "(x {} {:.1f})".format(constant_sign, (abs(s.real) + s.imag * 1j))
@@ -82,7 +86,7 @@ def plot_pol_and_roots(func, title, prev_sol, traces=None):
     plt.savefig(str(title))
     plt.close()
 
-    return sols, traces
+    return sols, coef_traces, sol_traces
 
 def interpolate(p1, p2, t):
     """ Interpolates between points p1 and p2 with a fraction t (0 <= t <= 1) """
@@ -140,10 +144,11 @@ triangle_points = polygon([0, -3+3j, +3j, 0], 60)
 
 _, sols = aberthMethod(Function({0: -1, 1: 1/2, 2:1}))
 sols = sorted(sols, key=lambda x: x.imag)
-traces = [[], []]
+coef_traces = [[], []]
+sol_traces = [[], []]
 
 for i in range(60):
-    sols, traces = plot_pol_and_roots(Function({0: -1, 1: 1/2 + triangle_points[i], 2:1}), title=i, prev_sol=sols, traces=traces)
+    sols, coef_traces, sol_traces = plot_pol_and_roots(Function({0: -1, 1: 1/2 + triangle_points[i], 2:1}), title=i, prev_sol=sols, coef_traces=coef_traces, sol_traces=sol_traces)
 
 quit()
 for i in range(40):
