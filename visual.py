@@ -48,7 +48,7 @@ def plot_pol_and_roots(func, title, prev_sol):
     plt.gca().spines['top'].set_visible(False)
 
     constant_sign = "+" if func.coef[-2].real >= 0 else "-"
-    plt.title(r"$x^2 + ({:.1f})x {} {:.1f}$=0".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', '\mathrm{i}'))
+    plt.title(r"$x^2 + ({:.1f})x {} {:.1f}$=0".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', '\mathrm{i}'), loc='left')
 
     plt.subplot(122)
     _, sols = aberthMethod(func)
