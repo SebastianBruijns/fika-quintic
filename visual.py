@@ -35,12 +35,17 @@ def sort_with_noise(reference_list, noisy_list):
 
     return sorted_noisy_list
 
-def plot_pol_and_roots(func, title, prev_sol):
+def plot_pol_and_roots(func, title, prev_sol, traces=None):
     plt.figure(figsize=(12, 8))
     plt.subplot(121)
 
-    for coef, color in zip(func.coef[:-1], colors):  # ignore last coefficient, it's 1, we ignore constant scaling
+    for i, (coef, color) in enumerate(zip(func.coef[:-1], colors)):  # ignore last coefficient, it's 1, we ignore constant scaling
         plt.plot(coef.real, coef.imag, c=color, marker='o')
+
+        if traces:
+            plt.plot([t.real for t in traces[i]], [t.imag for t in traces[i]], c=color, alpha=0.2)
+            traces[i].append(coef)
+
     plt.xlim(-5, 5)
     plt.ylim(-5, 5)
 
@@ -77,7 +82,7 @@ def plot_pol_and_roots(func, title, prev_sol):
     plt.savefig(str(title))
     plt.close()
 
-    return sols
+    return sols, traces
 
 def interpolate(p1, p2, t):
     """ Interpolates between points p1 and p2 with a fraction t (0 <= t <= 1) """
@@ -135,9 +140,10 @@ triangle_points = polygon([0, -3+3j, +3j, 0], 60)
 
 _, sols = aberthMethod(Function({0: -1, 1: 1/2, 2:1}))
 sols = sorted(sols, key=lambda x: x.imag)
+traces = [[], []]
 
 for i in range(60):
-    sols = plot_pol_and_roots(Function({0: -1, 1: 1/2 + triangle_points[i], 2:1}), title=i, prev_sol=sols)
+    sols, traces = plot_pol_and_roots(Function({0: -1, 1: 1/2 + triangle_points[i], 2:1}), title=i, prev_sol=sols, traces=traces)
 
 quit()
 for i in range(40):
