@@ -7,24 +7,28 @@ import numpy as np
 a = Function({0: -1, 1: 1/2, 2:1})
 aberthMethod(a)
 
+colors = ['r', 'g', 'b']
+
 def plot_pol_and_roots(func, title):
     plt.subplot(121)
 
-    plt.plot([func.coef[0].real], [func.coef[0].imag], c='r', marker='o')
-    plt.plot([func.coef[1].real], [func.coef[1].imag], c='g', marker='o')
+    for coef, color in zip(func.coef[:-1], colors):  # ignore last coefficient, it's 1, we ignore constant scaling
+        plt.plot(coef.real, coef.imag, c=color, marker='o')
     plt.xlim(-5, 5)
     plt.ylim(-5, 5)
 
     plt.subplot(122)
     _, sols = aberthMethod(func)
 
-    plt.plot([sols[0].real], [sols[0].imag], c='r', marker='o')
-    plt.plot([sols[1].real], [sols[1].imag], c='g', marker='o')
+    for s, color in zip(sols, colors):
+        plt.plot(s.real, s.imag, c=color, marker='o')
     plt.xlim(-5, 5)
     plt.ylim(-5, 5)
 
     plt.savefig(str(title))
     plt.close()
+
+    return sols
 
 def interpolate(p1, p2, t):
     """ Interpolates between points p1 and p2 with a fraction t (0 <= t <= 1) """
