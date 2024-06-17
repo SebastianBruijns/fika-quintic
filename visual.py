@@ -104,7 +104,7 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
 
     plt.tight_layout()
     plt.savefig(str(title))
-    plt.close()
+    plt.show()
 
     return sols, coef_traces, sol_traces
 
@@ -157,8 +157,8 @@ def polygon(points, n):
 
     return result
 
-def make_plots(points_to_traverse, title, traces=False):
-    _, sols = aberthMethod(Function({0: -1, 1: 1/2, 2:1}))
+def make_plots(points_to_traverse, title, traces=False, coefs=[-1, 1/2, 1]):
+    _, sols = aberthMethod(Function(dict(zip(range(len(coefs)), coefs))))
     sols = sorted(sols, key=lambda x: x.real)
     coef_traces = [[], []]
     sol_traces = [[], []]
@@ -167,11 +167,14 @@ def make_plots(points_to_traverse, title, traces=False):
 
     for i, p in enumerate(zip(*points_to_traverse)):
         p1, p2 = p
+        mod_coefs = coefs.copy()
+        mod_coefs[0] += p1
+        mod_coefs[1] += p2
         if not traces:
-            sols, coef_traces, sol_traces = plot_pol_and_roots(Function({0: -1 + p1, 1: 1/2 + p2, 2:1}),
+            sols, coef_traces, sol_traces = plot_pol_and_roots(Function(dict(zip(range(len(coefs)), mod_coefs))),
                                                             title=title.format(i), prev_sol=sols)
         else:
-            sols, coef_traces, sol_traces = plot_pol_and_roots(Function({0: -1 + p1, 1: 1/2 + p2, 2:1}),
+            sols, coef_traces, sol_traces = plot_pol_and_roots(Function(dict(zip(range(len(coefs)), mod_coefs))),
                                                             title=title.format(i), prev_sol=sols, coef_traces=coef_traces,
                                                             sol_traces=sol_traces)
 
