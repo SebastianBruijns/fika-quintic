@@ -6,6 +6,8 @@ import imageio
 
 plt.rcParams["font.family"] = "monospace"
 plt.rcParams["font.monospace"] = ["FreeMono"]
+title_size = 20
+ticksize = 14
 
 a = Function({0: -1, 1: 1/2, 2:1})
 aberthMethod(a)
@@ -37,7 +39,7 @@ def sort_with_noise(reference_list, noisy_list):
     return sorted_noisy_list
 
 def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None):
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(14, 8))
     plt.subplot(121)
 
     for i, (coef, color) in enumerate(zip(func.coef[:-1], colors)):  # ignore last coefficient, it's 1, we ignore constant scaling
@@ -47,16 +49,18 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
             plt.plot([t.real for t in coef_traces[i]], [t.imag for t in coef_traces[i]], c=color, alpha=0.2)
             coef_traces[i].append(coef)
 
-    plt.xlim(-4, 4)
-    plt.ylim(-4, 4)
-
+    plt.gca().tick_params(axis='both', which='major', labelsize=ticksize)
     plt.gca().spines['left'].set_position(('data', 0))
     plt.gca().spines['bottom'].set_position(('data', 0))
     plt.gca().spines['right'].set_visible(False)
     plt.gca().spines['top'].set_visible(False)
+    plt.gca().set_aspect('equal', 'box')
+
+    plt.xlim(-4, 4)
+    plt.ylim(-4, 4)
 
     constant_sign = "+" if func.coef[-2].real >= 0 else "-"
-    plt.title("x^2 + ({:.1f})x {} {:.1f}=0".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', 'i'))
+    plt.title("x^2 + ({:.1f})x {} {:.1f}=0".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', 'i'), size=title_size)
 
     plt.subplot(122)
     _, sols = aberthMethod(func)
@@ -74,18 +78,21 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
         left_title += "(x {} {:.1f})".format(constant_sign, (abs(s.real) + s.imag * 1j))
     left_title += "=0"
 
-    plt.title(left_title.replace('j', 'i'))
-        
-    plt.xlim(-4, 4)
-    plt.ylim(-4, 4)
+    plt.title(left_title.replace('j', 'i'), size=title_size)
 
+    plt.gca().tick_params(axis='both', which='major', labelsize=ticksize)
     plt.gca().spines['left'].set_position(('data', 0))
     plt.gca().spines['bottom'].set_position(('data', 0))
     plt.gca().spines['right'].set_visible(False)
     plt.gca().spines['top'].set_visible(False)
+    plt.gca().set_aspect('equal', 'box')
+        
+    plt.xlim(-4, 4)
+    plt.ylim(-4, 4)
 
+    plt.tight_layout()
     plt.savefig(str(title))
-    plt.close()
+    plt.show()
 
     return sols, coef_traces, sol_traces
 
@@ -152,9 +159,9 @@ def make_plots(points_to_traverse, title):
                                                         title=title.format(i), prev_sol=sols)
 
     images = []
-    for i in range(len(points_to_traverse)):
+    for i in range(len(points_to_traverse[0])):
         images.append(imageio.imread(title.format(i) + '.png'))
-    imageio.mimsave('gif_' + title[:-2] + '.gif', images, format='GIF', duration=0.065, loop=0)
+    imageio.mimsave('gif_' + title[:-2] + '.gif', images, format='GIF', duration=0.065, loop=1)
 
 triangle_points = polygon([0, -3+3j], 30)
 make_plots(points_to_traverse=[[0]*30, triangle_points], title="param_exp_1_{}")
@@ -166,10 +173,7 @@ triangle_points = polygon([-3+3j, 0+3j], 30)
 make_plots(points_to_traverse=[[0-2j]*30, triangle_points], title="param_exp_3_{}")
 
 triangle_points = polygon([0-2j, 0], 30)
-make_plots(points_to_traverse=[triangle_points, [0+3j]*30], title="param_exp_4_{}")
-
-triangle_points = polygon([0+3j, 0], 30)
-make_plots(points_to_traverse=[[0]*30, triangle_points], title="param_exp_5_{}")
+make_plots(points_to_traverse=[triangle_points, polygon([0+3j, 0], 30)], title="param_exp_4_{}")
 
 quit()
 # Example usage:
