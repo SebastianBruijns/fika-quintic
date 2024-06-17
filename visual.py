@@ -9,11 +9,13 @@ plt.rcParams["font.monospace"] = ["FreeMono"]
 title_size = 24
 ticksize = 14
 annotation_size = 14
+trace_alpha = 0.3
 
 a = Function({0: -1, 1: 1/2, 2:1})
 aberthMethod(a)
 
-colors = ['r', 'g', 'b']
+coef_colors = ['#377eb8', '#ff7f00', '#4daf4a', '#f781bf', '#a65628']
+sol_colors = ['#984ea3', '#999999', '#e41a1c', '#dede00']
 
 def sort_with_noise(reference_list, noisy_list):
     sorted_noisy_list = []
@@ -43,12 +45,12 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
     plt.figure(figsize=(14, 6.5))
     plt.subplot(121)
 
-    for i, (coef, color) in enumerate(zip(func.coef[:-1], colors)):  # ignore last coefficient, it's 1, we ignore constant scaling
-        plt.plot(coef.real, coef.imag, c=color, marker='o')
+    for i, (coef, color) in enumerate(zip(func.coef[:-1], coef_colors)):  # ignore last coefficient, it's 1, we ignore constant scaling
+        plt.plot(coef.real, coef.imag, c=color, marker='o', ms=6)
         plt.annotate(r"$a_{}$".format(i+1), (coef.real + 0.15, coef.imag + 0.15), size=annotation_size)
 
         if coef_traces:
-            plt.plot([t.real for t in coef_traces[i]], [t.imag for t in coef_traces[i]], c=color, alpha=0.2)
+            plt.plot([t.real for t in coef_traces[i]], [t.imag for t in coef_traces[i]], c=color, alpha=trace_alpha)
             coef_traces[i].append(coef)
 
     plt.gca().tick_params(axis='both', which='major', labelsize=ticksize)
@@ -73,11 +75,11 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
     sols = sort_with_noise(prev_sol, sols)
     left_title = ""
 
-    for i, (s, color) in enumerate(zip(sols, colors)):
-        plt.plot(s.real, s.imag, c=color, marker='o')
+    for i, (s, color) in enumerate(zip(sols, sol_colors)):
+        plt.plot(s.real, s.imag, c=color, marker='*', ms=9)
 
         if sol_traces:
-            plt.plot([t.real for t in sol_traces[i]], [t.imag for t in sol_traces[i]], c=color, alpha=0.2)
+            plt.plot([t.real for t in sol_traces[i]], [t.imag for t in sol_traces[i]], c=color, alpha=trace_alpha)
             sol_traces[i].append(s)
 
         constant_sign = "+" if s.real >= 0 else "-"
@@ -102,7 +104,7 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
 
     plt.tight_layout()
     plt.savefig(str(title))
-    plt.show()
+    plt.close()
 
     return sols, coef_traces, sol_traces
 
@@ -155,7 +157,7 @@ def polygon(points, n):
 
     return result
 
-def make_plots(points_to_traverse, title):
+def make_plots(points_to_traverse, title, traces=False):
     _, sols = aberthMethod(Function({0: -1, 1: 1/2, 2:1}))
     sols = sorted(sols, key=lambda x: x.real)
     coef_traces = [[], []]
@@ -165,38 +167,35 @@ def make_plots(points_to_traverse, title):
 
     for i, p in enumerate(zip(*points_to_traverse)):
         p1, p2 = p
-        sols, coef_traces, sol_traces = plot_pol_and_roots(Function({0: -1 + p1, 1: 1/2 + p2, 2:1}),
-                                                        title=title.format(i), prev_sol=sols)
+        if not traces:
+            sols, coef_traces, sol_traces = plot_pol_and_roots(Function({0: -1 + p1, 1: 1/2 + p2, 2:1}),
+                                                            title=title.format(i), prev_sol=sols)
+        else:
+            sols, coef_traces, sol_traces = plot_pol_and_roots(Function({0: -1 + p1, 1: 1/2 + p2, 2:1}),
+                                                            title=title.format(i), prev_sol=sols, coef_traces=coef_traces,
+                                                            sol_traces=sol_traces)
 
     images = []
     for i in range(len(points_to_traverse[0])):
         images.append(imageio.imread(title.format(i) + '.png'))
     imageio.mimsave('gif_' + title[:-2] + '.gif', images, format='GIF', duration=0.065, loop=1)
 
-triangle_points = polygon([0, -3+3j], 30)
-make_plots(points_to_traverse=[[0]*30, triangle_points], title="param_exp_1_{}")
+if False:
+    triangle_points = polygon([0, -3+3j], 30)
+    make_plots(points_to_traverse=[[0]*30, triangle_points], title="param_exp_1_{}")
 
-triangle_points = polygon([0, 0-2j], 30)
-make_plots(points_to_traverse=[triangle_points, [-3+3j]*30], title="param_exp_2_{}")
+    triangle_points = polygon([0, 0-2j], 30)
+    make_plots(points_to_traverse=[triangle_points, [-3+3j]*30], title="param_exp_2_{}")
 
-triangle_points = polygon([-3+3j, 0+3j], 30)
-make_plots(points_to_traverse=[[0-2j]*30, triangle_points], title="param_exp_3_{}")
+    triangle_points = polygon([-3+3j, 0+3j], 30)
+    make_plots(points_to_traverse=[[0-2j]*30, triangle_points], title="param_exp_3_{}")
 
-triangle_points = polygon([0-2j, 0], 30)
-make_plots(points_to_traverse=[triangle_points, polygon([0+3j, 0], 30)], title="param_exp_4_{}")
+    make_plots(points_to_traverse=[polygon([0-2j, 0], 30), polygon([0+3j, 0], 30)], title="param_exp_4_{}")
 
-quit()
+
 # Example usage:
 triangle_points = polygon([0, -3+3j, +3j, 0], 60)
-
-_, sols = aberthMethod(Function({0: -1, 1: 1/2, 2:1}))
-sols = sorted(sols, key=lambda x: x.imag)
-coef_traces = [[], []]
-sol_traces = [[], []]
-
-for i in range(60):
-    sols, coef_traces, sol_traces = plot_pol_and_roots(Function({0: -1, 1: 1/2 + triangle_points[i], 2:1}), title=i, prev_sol=sols, coef_traces=coef_traces, sol_traces=sol_traces)
-
+make_plots(points_to_traverse=[[0]*60, triangle_points], title="loop_{}", traces=True)
 quit()
 for i in range(40):
     plot_pol_and_roots(Function({0: -1, 1: 1/2 + np.exp(2 * 3.14159 * 1j * i / 40) * 5 * (1 - np.abs(20 - i) / 20), 2:1}), title=i)
