@@ -50,8 +50,8 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
         plt.annotate(r"$a_{}$".format(i+1), (coef.real + 0.15, coef.imag + 0.15), size=annotation_size)
 
         if coef_traces:
-            plt.plot([t.real for t in coef_traces[i]], [t.imag for t in coef_traces[i]], c=color, alpha=trace_alpha)
             coef_traces[i].append(coef)
+            plt.plot([t.real for t in coef_traces[i]], [t.imag for t in coef_traces[i]], c=color, alpha=trace_alpha)
 
     plt.gca().tick_params(axis='both', which='major', labelsize=ticksize)
     plt.gca().spines['left'].set_position(('data', 0))
@@ -196,6 +196,9 @@ if False:
 # Example usage:
 triangle_points = polygon([0, -3+3j, +3j, 0], 60)
 make_plots(points_to_traverse=[[0]*60, triangle_points], title="loop_{}", traces=True)
+
+triangle_points = polygon([0, -3+3j, +3j, 0, -3+3j, +3j, 0], 120)
+make_plots(points_to_traverse=[[0]*120, triangle_points], title="double_loop_{}", traces=True)
 quit()
 for i in range(40):
     plot_pol_and_roots(Function({0: -1, 1: 1/2 + np.exp(2 * 3.14159 * 1j * i / 40) * 5 * (1 - np.abs(20 - i) / 20), 2:1}), title=i)
