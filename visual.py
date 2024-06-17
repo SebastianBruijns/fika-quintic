@@ -6,7 +6,7 @@ import imageio
 
 plt.rcParams["font.family"] = "monospace"
 plt.rcParams["font.monospace"] = ["FreeMono"]
-title_size = 20
+title_size = 24
 ticksize = 14
 
 a = Function({0: -1, 1: 1/2, 2:1})
@@ -39,7 +39,7 @@ def sort_with_noise(reference_list, noisy_list):
     return sorted_noisy_list
 
 def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None):
-    plt.figure(figsize=(14, 8))
+    plt.figure(figsize=(14, 6.5))
     plt.subplot(121)
 
     for i, (coef, color) in enumerate(zip(func.coef[:-1], colors)):  # ignore last coefficient, it's 1, we ignore constant scaling
@@ -60,7 +60,11 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
     plt.ylim(-4, 4)
 
     constant_sign = "+" if func.coef[-2].real >= 0 else "-"
-    plt.title("x^2 + ({:.1f})x {} {:.1f}=0".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', 'i'), size=title_size)
+    # plt.title("x^2 + ({:.1f})x {} {:.1f}=0".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', 'i'), size=title_size)
+    plt.text(0.5, 1.06, "x^2 + ({:.1f})x {} {:.1f}=0".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', 'i'),
+         horizontalalignment='center',
+         fontsize=title_size,
+         transform = plt.gca().transAxes)
 
     plt.subplot(122)
     _, sols = aberthMethod(func)
@@ -78,7 +82,11 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
         left_title += "(x {} {:.1f})".format(constant_sign, (abs(s.real) + s.imag * 1j))
     left_title += "=0"
 
-    plt.title(left_title.replace('j', 'i'), size=title_size)
+    # plt.title(left_title.replace('j', 'i'), size=title_size)
+    plt.text(0.5, 1.06, left_title.replace('j', 'i'),
+         horizontalalignment='center',
+         fontsize=title_size,
+         transform = plt.gca().transAxes)
 
     plt.gca().tick_params(axis='both', which='major', labelsize=ticksize)
     plt.gca().spines['left'].set_position(('data', 0))
