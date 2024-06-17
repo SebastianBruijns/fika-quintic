@@ -8,6 +8,7 @@ plt.rcParams["font.family"] = "monospace"
 plt.rcParams["font.monospace"] = ["FreeMono"]
 title_size = 24
 ticksize = 14
+annotation_size = 14
 
 a = Function({0: -1, 1: 1/2, 2:1})
 aberthMethod(a)
@@ -44,6 +45,7 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
 
     for i, (coef, color) in enumerate(zip(func.coef[:-1], colors)):  # ignore last coefficient, it's 1, we ignore constant scaling
         plt.plot(coef.real, coef.imag, c=color, marker='o')
+        plt.annotate(r"$a_{}$".format(i+1), (coef.real + 0.15, coef.imag + 0.15), size=annotation_size)
 
         if coef_traces:
             plt.plot([t.real for t in coef_traces[i]], [t.imag for t in coef_traces[i]], c=color, alpha=0.2)
