@@ -2,6 +2,7 @@ from aberth_method.function import Function
 from aberth_method.aberthMethod import aberthMethod
 import matplotlib.pyplot as plt
 import numpy as np
+import imageio
 
 plt.rcParams["font.family"] = "monospace"
 plt.rcParams["font.monospace"] = ["FreeMono"]
@@ -46,8 +47,8 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
             plt.plot([t.real for t in coef_traces[i]], [t.imag for t in coef_traces[i]], c=color, alpha=0.2)
             coef_traces[i].append(coef)
 
-    plt.xlim(-5, 5)
-    plt.ylim(-5, 5)
+    plt.xlim(-4, 4)
+    plt.ylim(-4, 4)
 
     plt.gca().spines['left'].set_position(('data', 0))
     plt.gca().spines['bottom'].set_position(('data', 0))
@@ -75,8 +76,8 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
 
     plt.title(left_title.replace('j', 'i'))
         
-    plt.xlim(-5, 5)
-    plt.ylim(-5, 5)
+    plt.xlim(-4, 4)
+    plt.ylim(-4, 4)
 
     plt.gca().spines['left'].set_position(('data', 0))
     plt.gca().spines['bottom'].set_position(('data', 0))
@@ -137,9 +138,41 @@ def polygon(points, n):
 
     return result
 
+def make_plots(points_to_traverse, title):
+    _, sols = aberthMethod(Function({0: -1, 1: 1/2, 2:1}))
+    sols = sorted(sols, key=lambda x: x.real)
+    coef_traces = [[], []]
+    sol_traces = [[], []]
+
+    print(sols)
+
+    for i, p in enumerate(zip(*points_to_traverse)):
+        p1, p2 = p
+        sols, coef_traces, sol_traces = plot_pol_and_roots(Function({0: -1 + p1, 1: 1/2 + p2, 2:1}),
+                                                        title=title.format(i), prev_sol=sols)
+
+    images = []
+    for i in range(len(points_to_traverse)):
+        images.append(imageio.imread(title.format(i) + '.png'))
+    imageio.mimsave('gif_' + title[:-2] + '.gif', images, format='GIF', duration=0.065, loop=0)
+
+triangle_points = polygon([0, -3+3j], 30)
+make_plots(points_to_traverse=[[0]*30, triangle_points], title="param_exp_1_{}")
+
+triangle_points = polygon([0, 0-2j], 30)
+make_plots(points_to_traverse=[triangle_points, [-3+3j]*30], title="param_exp_2_{}")
+
+triangle_points = polygon([-3+3j, 0+3j], 30)
+make_plots(points_to_traverse=[[0-2j]*30, triangle_points], title="param_exp_3_{}")
+
+triangle_points = polygon([0-2j, 0], 30)
+make_plots(points_to_traverse=[triangle_points, [0+3j]*30], title="param_exp_4_{}")
+
+triangle_points = polygon([0+3j, 0], 30)
+make_plots(points_to_traverse=[[0]*30, triangle_points], title="param_exp_5_{}")
+
+quit()
 # Example usage:
-points = [0 + 0j, 4 + 0j, 4 + 3j, 0 + 3j]
-n = 10
 triangle_points = polygon([0, -3+3j, +3j, 0], 60)
 
 _, sols = aberthMethod(Function({0: -1, 1: 1/2, 2:1}))
