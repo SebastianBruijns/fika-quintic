@@ -1,0 +1,17 @@
+I can keep on shuffling around the solutions
+
+But there's no quintic formula which could keep on keeping up with this shuffling
+
+roots uniquely induce coefficients, but coefficients don't uniquely induce solution (they can always be permuted)
+
+for quadratic, there's no cont. func. giving us a solution, cause it's continuously swappable, that's why we need the square root
+
+https://youtu.be/BSHv9Elk1MU?t=1795
+
+does the square root buy this: the set of solutions hasn't changed! yes, z1 is now different, but the overall set is still the same
+he doesn't argue like that at all...
+no, it's more about changing z_1, without there being any reason for it changing, but I'm not quite there yet...
+https://youtu.be/BSHv9Elk1MU?t=1631
+but I thought we had this multi valueness precisely because things can switch around...
+yes, but if we undo the phase changes, then things should be back to where they started. but they aren't always. now it starts to make sense
+!because roots can change when there is a phase shift!
