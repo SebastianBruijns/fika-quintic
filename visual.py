@@ -104,7 +104,7 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
 
     plt.tight_layout()
     plt.savefig(str(title))
-    plt.show()
+    plt.close()
 
     return sols, coef_traces, sol_traces
 
@@ -197,11 +197,19 @@ if False:
 
 
 # Example usage:
-triangle_points = polygon([0, -3+3j, +3j, 0], 60)
-make_plots(points_to_traverse=[[0]*60, triangle_points], title="loop_{}", traces=True)
+if False:
+    triangle_points = polygon([0, -3+3j, +3j, 0], 60)
+    make_plots(points_to_traverse=[[0]*60, triangle_points], title="loop_{}", traces=True)
 
-triangle_points = polygon([0, -3+3j, +3j, 0, -3+3j, +3j, 0], 120)
-make_plots(points_to_traverse=[[0]*120, triangle_points], title="double_loop_{}", traces=True)
+    triangle_points = polygon([0, -3+3j, +3j, 0, -3+3j, +3j, 0], 120)
+    make_plots(points_to_traverse=[[0]*120, triangle_points], title="double_loop_{}", traces=True)
+
+root_1 = np.linspace(1-1j, 1+1j)
+root_2 = np.linspace(1+1j, -1-1j)
+combined_roots = np.vstack([root_1, root_2]).T
+points_to_traverse = [np.poly(r) for r in combined_roots]
+points_to_traverse = list(np.array(points_to_traverse).T[1::][::-1])
+make_plots(points_to_traverse=points_to_traverse, coefs=[0, 0, 1], title="test_{}", traces=True)
 quit()
 for i in range(40):
     plot_pol_and_roots(Function({0: -1, 1: 1/2 + np.exp(2 * 3.14159 * 1j * i / 40) * 5 * (1 - np.abs(20 - i) / 20), 2:1}), title=i)
