@@ -3,6 +3,8 @@ from aberth_method.aberthMethod import aberthMethod
 import matplotlib.pyplot as plt
 import numpy as np
 import imageio
+import math
+import cmath
 
 plt.rcParams["font.family"] = "monospace"
 plt.rcParams["font.monospace"] = ["FreeMono"]
@@ -15,7 +17,7 @@ a = Function({0: -1, 1: 1/2, 2:1})
 aberthMethod(a)
 
 coef_colors = ['#377eb8', '#ff7f00', '#4daf4a', '#f781bf', '#a65628']
-sol_colors = ['#984ea3', '#999999', '#e41a1c', '#dede00']
+sol_colors = ['#984ea3', '#999999', '#e41a1c', '#dede00', 'k']
 
 def sort_with_noise(reference_list, noisy_list):
     sorted_noisy_list = []
@@ -41,17 +43,32 @@ def sort_with_noise(reference_list, noisy_list):
 
     return sorted_noisy_list
 
-def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None):
+def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None, plot_start=False):
     plt.figure(figsize=(14, 6.5))
     plt.subplot(121)
 
+    right_title = "x^2"
     for i, (coef, color) in enumerate(zip(func.coef[:-1], coef_colors)):  # ignore last coefficient, it's 1, we ignore constant scaling
         plt.plot(coef.real, coef.imag, c=color, marker='o', ms=6)
         plt.annotate(r"$a_{}$".format(i+1), (coef.real + 0.15, coef.imag + 0.15), size=annotation_size)
+        coef_traces[i].append(coef)
+
+        constant_sign = "+" if coef.real >= 0 else "-"
+        mult = -1 if coef.real < 0 else 1
+        x_string = "x^{}".format(2-i-1)
+        if 2-i-1 == 1:
+            x_string = "x"
+        elif 2-i-1 == 0:
+            x_string = ""
+        right_title += "{}({:.1f}){}".format(constant_sign, (abs(coef.real) + mult * coef.imag * 1j), x_string)
 
         if coef_traces:
-            coef_traces[i].append(coef)
             plt.plot([t.real for t in coef_traces[i]], [t.imag for t in coef_traces[i]], c=color, alpha=trace_alpha)
+
+    # plt.text(0.5, 1.06, (right_title + "=0").replace('j', 'i'),
+    #     horizontalalignment='center',
+    #     fontsize=title_size,
+    #     transform = plt.gca().transAxes)
 
     plt.gca().tick_params(axis='both', which='major', labelsize=ticksize)
     plt.gca().spines['left'].set_position(('data', 0))
@@ -63,34 +80,31 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
     plt.xlim(-4, 4)
     plt.ylim(-4, 4)
 
-    constant_sign = "+" if func.coef[-2].real >= 0 else "-"
-    # plt.title("x^2 + ({:.1f})x {} {:.1f}=0".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', 'i'), size=title_size)
-    plt.text(0.5, 1.06, "x^2 + ({:.1f})x {} {:.1f}=0".format(func.coef[0], constant_sign, (abs(func.coef[1].real) + func.coef[1].imag * 1j)).replace('j', 'i'),
-         horizontalalignment='center',
-         fontsize=title_size,
-         transform = plt.gca().transAxes)
-
     plt.subplot(122)
     _, sols = aberthMethod(func)
     sols = sort_with_noise(prev_sol, sols)
     left_title = ""
 
     for i, (s, color) in enumerate(zip(sols, sol_colors)):
+        sol_traces[i].append(s)
+        if plot_start:
+            plt.plot(sol_traces[i][0].real, sol_traces[i][0].imag, c=color, marker='o', ms=14, zorder=0)
+            plt.plot(sol_traces[i][0].real, sol_traces[i][0].imag, c='white', marker='o', ms=11, zorder=0)
+
         plt.plot(s.real, s.imag, c=color, marker='*', ms=9)
 
         if sol_traces:
             plt.plot([t.real for t in sol_traces[i]], [t.imag for t in sol_traces[i]], c=color, alpha=trace_alpha)
-            sol_traces[i].append(s)
 
         constant_sign = "+" if s.real >= 0 else "-"
         left_title += "(x {} {:.1f})".format(constant_sign, (abs(s.real) + s.imag * 1j))
     left_title += "=0"
 
     # plt.title(left_title.replace('j', 'i'), size=title_size)
-    plt.text(0.5, 1.06, left_title.replace('j', 'i'),
-         horizontalalignment='center',
-         fontsize=title_size,
-         transform = plt.gca().transAxes)
+    # plt.text(0.5, 1.06, left_title.replace('j', 'i'),
+    #      horizontalalignment='center',
+    #      fontsize=title_size,
+    #      transform = plt.gca().transAxes)
 
     plt.gca().tick_params(axis='both', which='major', labelsize=ticksize)
     plt.gca().spines['left'].set_position(('data', 0))
@@ -103,7 +117,7 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None)
     plt.ylim(-4, 4)
 
     plt.tight_layout()
-    plt.savefig(str(title))
+    plt.savefig("./images/" + str(title))
     plt.close()
 
     return sols, coef_traces, sol_traces
@@ -157,31 +171,87 @@ def polygon(points, n):
 
     return result
 
-def make_plots(points_to_traverse, title, traces=False, coefs=[-1, 1/2, 1]):
+def interpolate_arc(p1, p2, bulge, t):
+    """Interpolate along an arc between p1 and p2 with a bulge factor at t (0 <= t <= 1)"""
+    if bulge == 0:
+        # When bulge is zero, it degenerates to a straight line interpolation
+        return interpolate(p1, p2, t)
+    
+    # Calculate the chord length and the sagitta (height of the arc)
+    chord_length = abs(p2 - p1)
+    sagitta = (bulge * chord_length) / 2
+
+    # Calculate the midpoint of the chord
+    midpoint = (p1 + p2) / 2
+
+    # Calculate the angle between the chord and the x-axis
+    angle = cmath.phase(p2 - p1)
+
+    # Calculate the center of the circle forming the arc
+    direction = cmath.exp(1j * (angle + math.pi / 2))  # Perpendicular direction to the chord
+    arc_center = midpoint + sagitta * direction
+
+    # Calculate the radius of the circle
+    radius = abs(arc_center - p1)
+
+    # Calculate the angle subtended by the arc
+    theta = 2 * math.asin(chord_length / (2 * radius))
+
+    # Calculate the angle for the interpolation point
+    if bulge > 0:
+        # Positive bulge means counterclockwise arc
+        start_angle = cmath.phase(p1 - arc_center)
+        interp_angle = start_angle + t * theta
+    else:
+        # Negative bulge means clockwise arc
+        start_angle = cmath.phase(p2 - arc_center)
+        interp_angle = start_angle - t * theta
+
+    # Calculate the interpolated point on the arc
+    interpolated_point = arc_center + radius * cmath.exp(1j * interp_angle)
+    return interpolated_point
+
+def arc_polygon(points, n, bulge):
+    if n <= 0 or not points or len(points) < 2:
+        return []
+    
+    result = [points[0]]  # Start with the first point
+    total_points = len(points)
+    
+    for i in range(total_points - 1):
+        p1 = points[i]
+        p2 = points[i + 1]
+        
+        for j in range(1, n // (total_points - 1)):
+            t = j / (n // (total_points - 1))
+            result.append(interpolate_arc(p1, p2, bulge, t))
+    
+    if len(result) < n:
+        result.append(points[-1])  # Ensure the last point is included
+    
+    return result
+
+def make_plots(points_to_traverse, title, traces=False, coefs=[-1, 1/2, 1], loop=1, plot_start=False):
     _, sols = aberthMethod(Function(dict(zip(range(len(coefs)), coefs))))
     sols = sorted(sols, key=lambda x: x.real)
-    coef_traces = [[], []]
-    sol_traces = [[], []]
+    coef_traces = [[] for _ in range(len(coefs) - 1)]
+    sol_traces = [[] for _ in range(len(coefs) - 1)]
 
-    print(sols)
-
-    for i, p in enumerate(zip(*points_to_traverse)):
-        p1, p2 = p
+    for i, points in enumerate(zip(*points_to_traverse)):
         mod_coefs = coefs.copy()
-        mod_coefs[0] += p1
-        mod_coefs[1] += p2
+        mod_coefs = [c + p for c, p in zip(coefs, points)] + [1]
         if not traces:
             sols, coef_traces, sol_traces = plot_pol_and_roots(Function(dict(zip(range(len(coefs)), mod_coefs))),
-                                                            title=title.format(i), prev_sol=sols)
+                                                            title=title.format(i), prev_sol=sols, plot_start=plot_start)
         else:
             sols, coef_traces, sol_traces = plot_pol_and_roots(Function(dict(zip(range(len(coefs)), mod_coefs))),
                                                             title=title.format(i), prev_sol=sols, coef_traces=coef_traces,
-                                                            sol_traces=sol_traces)
+                                                            sol_traces=sol_traces, plot_start=plot_start)
 
     images = []
     for i in range(len(points_to_traverse[0])):
-        images.append(imageio.imread(title.format(i) + '.png'))
-    imageio.mimsave('gif_' + title[:-2] + '.gif', images, format='GIF', duration=0.065, loop=1)
+        images.append(imageio.imread("./images/" + title.format(i) + '.png'))
+    imageio.mimsave("./gifs/" + 'gif_' + title[:-2] + '.gif', images, format='GIF', duration=0.065, loop=loop)
 
 if False:
     triangle_points = polygon([0, -3+3j], 30)
@@ -202,14 +272,27 @@ if False:
     make_plots(points_to_traverse=[[0]*60, triangle_points], title="loop_{}", traces=True)
 
     triangle_points = polygon([0, -3+3j, +3j, 0, -3+3j, +3j, 0], 120)
-    make_plots(points_to_traverse=[[0]*120, triangle_points], title="double_loop_{}", traces=True)
+    make_plots(points_to_traverse=[[0]*120, triangle_points], title="double_loop_{}", traces=True, loop=0)
 
-root_1 = np.linspace(1-1j, 1+1j)
-root_2 = np.linspace(1+1j, -1-1j)
-combined_roots = np.vstack([root_1, root_2]).T
+
+if False:
+    p1 = [np.exp(2 * math.pi * 1j * x / 20) * 0.8 * min(1, (-abs(30 - x)+30) / 10) for x in range(60)]
+    make_plots(points_to_traverse=[p1, [0]*60], title="continuous_change_{}", loop=0)
+
+    p1 = [-np.exp(math.pi * 1j * x / 30) * 2 * (1 - abs(30 - x) / 30) for x in range(60)]
+    p1 = p1 + [0] * 10 + p1 + [0] * 10
+    make_plots(points_to_traverse=[p1, [0]*140], title="swap_{}", loop=0)
+
+# arc_polygon
+a, b, c, d, e = 1.55+1.45j, 0.03+0.91j, 1.21+0.02j, -1.13+0.37j, 0.21-0.95j
+roots = [arc_polygon([a, b, b+0.0001], 100, 0.5), arc_polygon([b, a, c], 100, 0.5), arc_polygon([c, c+0.0001, a], 100, 0.5),
+         np.ones(100) * d, np.ones(100) * e]
+
+combined_roots = np.vstack(roots).T
 points_to_traverse = [np.poly(r) for r in combined_roots]
 points_to_traverse = list(np.array(points_to_traverse).T[1::][::-1])
-make_plots(points_to_traverse=points_to_traverse, coefs=[0, 0, 1], title="test_{}", traces=True)
+
+make_plots(points_to_traverse=points_to_traverse, coefs=[0, 0, 0, 0, 0, 1], title="test_{}", traces=True, plot_start=True)
 quit()
 for i in range(40):
     plot_pol_and_roots(Function({0: -1, 1: 1/2 + np.exp(2 * 3.14159 * 1j * i / 40) * 5 * (1 - np.abs(20 - i) / 20), 2:1}), title=i)
