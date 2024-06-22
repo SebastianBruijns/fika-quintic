@@ -78,8 +78,12 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None,
     plt.gca().spines['top'].set_visible(False)
     plt.gca().set_aspect('equal', 'box')
 
-    plt.xlim(-2, 2)
-    plt.ylim(-2, 2)
+    if len(func.coef) < 4:
+        plt.xlim(-4, 4)
+        plt.ylim(-4, 4)
+    else:
+        plt.xlim(-2, 2)
+        plt.ylim(-2, 2)
 
     plt.subplot(122)
     _, sols = aberthMethod(func)
@@ -97,7 +101,7 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None,
                 plt.plot(sol_traces[i][0].real, sol_traces[i][0].imag, c='white', marker='o', ms=11, zorder=0)
             plt.plot([t.real for t in sol_traces[i]], [t.imag for t in sol_traces[i]], c=color, alpha=trace_alpha)
 
-        constant_sign = "+" if s.real >= 0 else "-"
+        constant_sign = "+" if s.real < 0 else "-"  # sign flip, since we need to subtract the root
         left_title += "(x {} {:.1f})".format(constant_sign, (abs(s.real) + s.imag * 1j))
     left_title += "=0"
 
@@ -115,8 +119,12 @@ def plot_pol_and_roots(func, title, prev_sol, coef_traces=None, sol_traces=None,
     plt.gca().spines['top'].set_visible(False)
     plt.gca().set_aspect('equal', 'box')
         
-    plt.xlim(-2, 2)
-    plt.ylim(-2, 2)
+    if len(func.coef) < 4:
+        plt.xlim(-4, 4)
+        plt.ylim(-4, 4)
+    else:
+        plt.xlim(-2, 2)
+        plt.ylim(-2, 2)
 
     plt.tight_layout()
     plt.savefig("./images/" + str(title))
