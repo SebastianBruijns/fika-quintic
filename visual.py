@@ -321,7 +321,7 @@ combined_roots = np.vstack(roots).T
 points_to_traverse = [np.poly(r) for r in combined_roots]
 points_to_traverse = list(np.array(points_to_traverse).T[1::][::-1])
 
-make_plots(points_to_traverse=points_to_traverse, coefs=[0, 0, 0, 1], title="cubic_full_{}", traces=True, plot_start=True)
+# make_plots(points_to_traverse=points_to_traverse, coefs=[0, 0, 0, 1], title="cubic_full_{}", traces=True, plot_start=True)
 quit()
 a, b, c, d, e = 1.55+1.45j, 0.03+0.91j, 1.21+0.02j, -1.13+0.37j, 0.21-0.95j
 roots = [arc_polygon([a, b, b+0.0001], 100, 0.5), arc_polygon([b, a, c], 100, 0.5), arc_polygon([c, c+0.0001, a], 100, 0.5),
