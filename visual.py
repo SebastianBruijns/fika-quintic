@@ -266,7 +266,7 @@ def make_plots(points_to_traverse, title, traces=False, coefs=[-1, 1/2, 1], loop
     else:
         imageio.mimsave("./gifs/" + 'gif_' + title[:-2] + '.gif', images, format='GIF', duration=0.065)
 
-if False:
+if True:
     triangle_points = polygon([0, -3+3j], 30)
     make_plots(points_to_traverse=[[0]*30, triangle_points], title="param_exp_1_{}")
 
@@ -278,15 +278,15 @@ if False:
 
     make_plots(points_to_traverse=[polygon([0-2j, 0], 30), polygon([0+3j, 0], 30)], title="param_exp_4_{}")
 
-# Example usage:
-if False:
+
+if True:
     triangle_points = polygon([0, -3+3j, +3j, 0], 60)
     make_plots(points_to_traverse=[[0]*60, triangle_points], title="loop_{}", traces=True)
 
     triangle_points = polygon([0, -3+3j, +3j, 0, -3+3j, +3j, 0], 120)
     make_plots(points_to_traverse=[[0]*120, triangle_points], title="double_loop_{}", traces=True, loop=0)
 
-if False:
+if True:
     p1 = [np.exp(2 * math.pi * 1j * x / 20) * 0.8 * min(1, (-abs(30 - x)+30) / 10) for x in range(60)]
     make_plots(points_to_traverse=[p1, [0]*60], title="continuous_change_{}", loop=0)
 
@@ -294,7 +294,7 @@ if False:
     p1 = p1 + [0] * 10 + p1 + [0] * 10
     make_plots(points_to_traverse=[p1, [0]*140], title="swap_{}", loop=0)
 
-if False:
+if True:
     p1 = [-np.exp(2 * math.pi * 1j * x / 60) * 2 for x in range(60)]
     make_plots(points_to_traverse=[p1, [0]*60], coefs=[0, 0, 1], title="continuous_change_2_{}", loop=0)
 
