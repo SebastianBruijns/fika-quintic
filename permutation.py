@@ -1,5 +1,4 @@
 from itertools import permutations
-from scipy.special import binom
 from math import factorial
 
 def invert_permutation(P):
@@ -19,7 +18,7 @@ def commutator(perm1, perm2):
 
     return tuple(start)
 
-for n in range(2, 8):
+for n in range(2, 6):
 
     print("for {} elements".format(n))
 
@@ -31,21 +30,14 @@ for n in range(2, 8):
             counter += 1
 
     print("{} possible permutations".format(factorial(n)))
-    print("{} possible commutators".format(counter)) 
+    print("{} possible commutators".format(counter))
+    print("resulting in {} permutations (commutators)".format(len(sols)))
 
     new_sols = set()
     for p1 in sols:
         for p2 in sols:
             new_sols.add(commutator(list(p1), list(p2)))
     
-    print("resulting in {} permutations (commutators)".format(len(new_sols)))
-
-    sols = new_sols
-    new_sols = set()
-    for p1 in sols:
-        for p2 in sols:
-            new_sols.add(commutator(list(p1), list(p2)))
-
     print("resulting in {} permutations (commutators of commutators)".format(len(new_sols)))
 
     sols = new_sols
@@ -55,3 +47,11 @@ for n in range(2, 8):
             new_sols.add(commutator(list(p1), list(p2)))
 
     print("resulting in {} permutations (commutators of commutators of commutators)".format(len(new_sols)))
+
+    sols = new_sols
+    new_sols = set()
+    for p1 in sols:
+        for p2 in sols:
+            new_sols.add(commutator(list(p1), list(p2)))
+
+    print("resulting in {} permutations (commutators of commutators of commutators of commutators)".format(len(new_sols)))
